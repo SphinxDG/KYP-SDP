@@ -9,14 +9,20 @@ problem_lists = {'control_examples','heat_flow_problems','second_order_problems'
 time_struct = struct();
 time_struct.Problem = [];
 
-for ii = 1:lenth(solvers)
+for ii = 1:length(solvers)
     solver = solvers{ii};
     time_struct.(solver) = [];
-    for jj = 1:lenth(problem_lists)
+    for jj = 1:length(problem_lists)
         problems = problem_lists{jj};
         load([solver,'_',problems,'_results.mat']);
-        load([problems,'.mat'])
-        time_struct.Problem = {time_struct.Problem,model_list};
-        time_struct.(solver) = [time_struct.(solver);computation_times];
+        time_struct.(solver) = [time_struct.(solver);computation_times'];
     end
 end
+
+for jj = 1:length(problem_lists)
+    problems = problem_lists{jj};
+    load([problems,'.mat'])
+    time_struct.Problem = [time_struct.Problem;model_list'];
+end
+
+computationTimes_table = struct2table(time_struct)

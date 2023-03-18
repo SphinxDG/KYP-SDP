@@ -6,7 +6,7 @@ close all
 % solver = 'customSolver';
 % solver = 'Mosek';
 solver = 'SeDuMi';
-% solver = 'LMILab';
+solver = 'LMILab';
 
 % select a list of problems
 
@@ -27,9 +27,9 @@ load([problems,'.mat'])
 % Mosek
 % skip_examples = {'NN18','HF2D1','HF2D2','HF2D3','HF2D4','HF2D5','HF2D6','HF2D7','HF2D8','HF2D9','CM5','CM6','CBM'};
 % SeDuMi
-skip_examples = {'EB6','TL','NN18','HF2D1','HF2D2','HF2D3','HF2D4','HF2D5','HF2D6','HF2D7','HF2D8','HF2D9','CM4','CM5','CM6','CBM'};
+% skip_examples = {'EB6','TL','NN18','HF2D1','HF2D2','HF2D3','HF2D4','HF2D5','HF2D6','HF2D7','HF2D8','HF2D9','CM4','CM5','CM6','ISS1','ISS2','CBM'};
 % LMILab
-% skip_examples = {'AC10','AC14','JE1','HF1','BDT2','CSE2','EB5','EB6','TL','CDP','NN18','HF2D1','HF2D2','HF2D3','HF2D4','HF2D5','HF2D6','HF2D7','HF2D8','HF2D9','CM2','CM3','CM4','CM5','CM6','DLR2','DLR3','ISS1','ISS2','CBM'};
+skip_examples = {'AC10','AC14','JE1','HF1','BDT2','CSE2','EB5','EB6','TL','CDP','NN18','HF2D1','HF2D2','HF2D3','HF2D4','HF2D5','HF2D6','HF2D7','HF2D8','HF2D9','CM2','CM3','CM4','CM5','CM6','DLR2','DLR3','ISS1','ISS2','CBM','LAH'};
 
 for jjj = 1:length(model_list)
     name = model_list{jjj};
