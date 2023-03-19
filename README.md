@@ -144,6 +144,7 @@ elimination techniques from Robust Control, we can formulate the linear matrix i
 
 $$
     \min_{\lambda \in \mathbb{R}^p, P \in \mathbb{S}^n} ~~ c^\top \lambda - trace (\Sigma P)\\
+    \left(
     \begin{array}{c|cc}
 		\mathcal{A}^\top & I & C^\top\\ \hline
 		I & 0 & 0
@@ -177,6 +178,7 @@ $$
 	\lambda_i > 0 ~~~ \forall i = 1,\ldots,p\\
 	P \succ 0
 $$
+
 for $P$ and $\lambda$. This is a KYP-SDP for Robust state feedback controller synthesis.
 
 To benchmark our solver, we extract matrices $(\mathcal{A},\mathcal{B})$ from CompLib and solve the KYP-SDP above for various dynamical systems.
