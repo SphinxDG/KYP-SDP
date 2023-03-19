@@ -24,7 +24,7 @@ $$
 		Q(\lambda) & S(\lambda)\\
 		S^\top (\lambda) & R(\lambda)
 	\end{pmatrix}
-	\prec 0, \label{eq:LMI}\\
+	\prec 0, \\
 	&\hspace{8mm} N(\lambda) \succ 0,\\
     &\hspace{8mm} P \succ 0.
 \end{align}
@@ -89,7 +89,7 @@ we want to find a control Lyapunov function $V: \mathbb{R}^n \to \mathbb{R}_{\ge
 such that there exists a controller $u = Kx$, which guarantees the performance 
 
 $$
-    V(x) \geq \int_0^\infty x^\top \mathcal{Q} x + u^\top \mathcal{R} u \mathbb{d}x .
+    V(x) \geq \int_0^\infty x^\top \mathcal{Q} x + u^\top \mathcal{R} u \mathrm{d}x .
 $$
 
 
@@ -143,43 +143,47 @@ for all $x \in \mathbb{R}^n$ and all $w$ for which the quadratic constraint hold
 elimination techniques from Robust Control, we can formulate the linear matrix inequality optimization problem
 
 $$
-    \min_{\lambda \in \mathbb{R}^p, P \in \mathbb{S}^n} ~~ c^\top \lambda - trace (\Sigma P)\\
-    \left(
-    \begin{array}{c|cc}
-		\mathcal{A}^\top & I & C^\top\\ \hline
+    \begin{align}
+    \min_{\lambda \in \mathbb{R}^p, P \in \mathbb{S}^n} ~&~ c^\top \lambda - trace ( P)\\
+    \text{s.t.   } &
+    \begin{pmatrix}
+		\mathcal{A}^\top & I & C^\top\\
 		I & 0 & 0
-	\end{array}
-	\right)^\top
-	\left(
-	\begin{array}{c|c}
-		0 & P\\\hline
+	\end{pmatrix}^\top
+	\begin{pmatrix}
+		0 & P\\
 		P & 0
-	\end{array}
-	\right)
-	\left(
-	\begin{array}{c|cc}
-		\mathcal{A}^\top & I & C^\top\\ \hline
+	\end{pmatrix}
+	\begin{pmatrix}
+		\mathcal{A}^\top & I & C^\top\\
 		I & 0 & 0
-	\end{array}
-	\right) - 
-	(\star)^\top \begin{pmatrix}
+	\end{pmatrix}
+	- 
+	\begin{pmatrix}
+		0 & -I & 0\\
+		\mathcal{B}^\top & 0 & I\\
+		0 & 0 & -I\\
+		\mathcal{B}^\top & 0 & 0
+	\end{pmatrix}^\top 
+	\begin{pmatrix}
 		\mathcal{Q}^{-1} & 0 & &\\
 		0 & \mathcal{R}^{-1} & &\\
 		& & M_{11}(\lambda) & M_{12}(\lambda)\\
 		& & M_{21}(\lambda) & M_{22}(\lambda)
 	\end{pmatrix}
-	\left(
-	\begin{array}{c|cc}
+	\begin{pmatrix}
 		0 & -I & 0\\
 		\mathcal{B}^\top & 0 & I\\
 		0 & 0 & -I\\
 		\mathcal{B}^\top & 0 & 0
-	\end{array}\right)\\
-	\lambda_i > 0 ~~~ \forall i = 1,\ldots,p\\
-	P \succ 0
+	\end{pmatrix} \prec 0\\
+	~&~
+	\lambda_i > 0 ~~~~~~~ \forall i = 1,\ldots,p\\
+	~&~P \succ 0
+    \end{align}
 $$
 
-for $P$ and $\lambda$. This is a KYP-SDP for Robust state feedback controller synthesis.
+for $P$ and $\lambda$. This is a KYP-SDP for robust state feedback controller synthesis.
 
 To benchmark our solver, we extract matrices $(\mathcal{A},\mathcal{B})$ from CompLib and solve the KYP-SDP above for various dynamical systems.
 
