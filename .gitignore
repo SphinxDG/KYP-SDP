@@ -9,6 +9,9 @@
 *.out
 *.synctex.gz
 *.toc
+optimalValues.tex
+computationTimes.tex
+table2latex.m
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
