@@ -188,7 +188,8 @@ for $P$ and $\lambda$. This is a KYP-SDP for robust state feedback controller sy
 To benchmark our solver, we extract matrices $(\mathcal{A},\mathcal{B})$ from CompLib and solve the KYP-SDP above for various dynamical systems.
 
 The following table compares computation times (in seconds) of the structure exploiting solver and the three off-the-shelve
-solvers Mosek, SeDuMi and LMILab. Inf means that the solver did not terminate after 10^4 seconds.
+solvers Mosek, SeDuMi and LMILab. Inf means that the solver did not terminate after 10^4 seconds. (We appologies that these values do not match
+exactly those in our publication. They have been generated in an independent simulation run.)
 
 
     Problem      customSolver     Mosek       SeDuMi      LMILab 
