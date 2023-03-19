@@ -5,7 +5,7 @@ Many Robust Control problems can be posed as linear matrix equation (LMI) optimi
 
 $$
 \begin{align}
-	&\min_{\lambda \in R^p, P \in S^n} ~~ c^\top \lambda - trace (\Sigma P)\\
+	&\min_{\lambda \in \mathbb{R}^p, P \in \mathbb{S}^n} ~~ c^\top \lambda - trace (\Sigma P)\\
 	&\mathrm{s.t.} ~~
 	\begin{pmatrix}
 		A & B\\
@@ -30,10 +30,10 @@ $$
 \end{align}
 $$
 
-In this optimization problem, $(A,B)$ defines a linear dynamical system
+In this optimization problem, the matrix pair $(A,B)$ defines a linear dynamical system
 
 $$
-\dot{x} = A x + Bu
+\dot{x} = A x + Bu,
 $$
 
 and is assumed to be controllable. Furthermore, $Q(\cdot)$, $S(\cdot)$, $R(\cdot)$ and $N(\cdot)$ are affine
@@ -45,14 +45,144 @@ The solver provided in this repository exploits the structure of the optimizatio
 matrix variable $P$ with the solution of a Riccati equation. This should be particularly efficient, when the
 state dimension $n$ is larger than the number of multipliers $p$.
 
+Our algorithm expects matrices $Q_i \in \mathbb{S}^n$, $S_i \in \mathbb{R}^{n\times m}$, $R_i \in \mathbb{S}^m$, $N_i \in \mathbb{S}^r$,
+$A \in \mathbb{R}^{n\times n}$, $B \in \mathbb{R}^{n\times m}$, $\Sigma \in \mathbb{S}^n$ and $c \in \mathbb{R}^p$ for $i = 0,\ldots, p$
+as input. Here, $\Sigma$ must be a positive definite matrix and $n,m,p,r \in \mathbb{N}$ must be positive integers.
+
+
+The algorithm is contained in the file
+ - customKYPLMIsolver.m
+
+In addition to the code for the solver, this repository contains a benchmark example for the solver, which is contained
+in the files
+ - compLibTestCustomSolver.m
+ - robustSynthesisCustomSolver.m
+ - robustSynthesisYalmip.m
+
+This experiment is based on the library of control systems provided in http://www.complib.de . Here, "compLibTestCustomSolver.m"
+is the main script, whereas "robustSynthesisCustomSolver.m" and "robustSynthesisYalmip.m" contain subroutines for calling
+different solvers for robust controller synthesis. Furthermore, this experiment comes with the files
+ - loadMatricesFromCompLib.m
+ - generateTables.m
+
+to extract data from Complib and to generate the table with computation times provided below.
+
 
 
 # Simulation example
 
+To demonstrate the structure exploitation of our algorithm, a benchmark of robust controller
+synthesis was carried out. To this end, a dynamical system of the structure
+
+$$
+    \dot{x} = \mathcal{A} x + \mathcal{B} \begin{pmatrix}
+    1 + \delta_1 & & \\
+    & \ddots &\\
+    & & 1 + \delta_m
+    \end{pmatrix}
+    u
+$$
+
+is considered, where $\delta_1,\ldots,\delta_m\in [-0.25,0.25]$ are uncertain parameters that model 
+an uncertainty in the actuators of the system. Our aim is the design of a robust LQR controller, i.e.,
+we want to find a control Lyapunov function $V: \mathbb{R}^n \to \mathbb{R}_{\geq 0}, x \mapsto x^\top P^{-1} x$,
+such that there exists a controller $u = Kx$, which guarantees the performance 
+
+$$
+    V(x) \geq \int_0^\infty x^\top \mathcal{Q} x + u^\top \mathcal{R} u \mathbb{d}x .
+$$
 
 
-The following table compares solution times of the structure exploiting solver and the three off-the-shelve
-solvers Mosek, SeDuMi and LMILab.
+By interpreting the signal
+
+$$
+    \begin{pmatrix}
+    1 + \delta_1 & & \\
+    & \ddots &\\
+    & & 1 + \delta_m
+    \end{pmatrix}
+    u
+    =
+    u + w
+$$
+
+as the sum of the input and a disturbance signal $w$ with $w_i := \delta_i u_i$, we can denote the
+control system as
+
+$$
+    \dot{x} = \mathcal{A} x + \mathcal{B} u + \mathcal{B} w.
+$$
+
+Note that $w$ satisfies the quadratic constraint
+
+$$
+	\begin{pmatrix}
+		u\\
+		w
+	\end{pmatrix}^\top M(\lambda)^{-1}
+	\begin{pmatrix}
+		u\\
+		w
+	\end{pmatrix} \geq 0 
+$$
+
+for
+
+$$
+    M(\lambda) = diag (\gamma^2\lambda_1,\ldots,\gamma^2\lambda_p,-\lambda_1,\ldots,-\lambda_p)
+$$
+
+and all $\lambda \in \mathbb{R}^p_{> 0}$ and $\gamma = 0.25$. Consequently, $V: \mathbb{R}^n \to \mathbb{R}_{\geq 0}, x \mapsto x^\top P^{-1} x$ 
+is such a robust control Lyapunov function if it satisfies
+
+$$
+	\min_{u\in \mathbb{R}^m}\nabla V(x)^\top (\mathcal{A} x + \mathcal{B} u + \mathcal{B} w) + x^\top \mathcal{Q} x + u^\top \mathcal{R} u \leq 0
+$$
+
+for all $x \in \mathbb{R}^n$ and all $w$ for which the quadratic constraint holds. Using (standard) multiplier relaxation and
+elimination techniques from Robust Control, we can formulate the linear matrix inequality optimization problem
+
+$$
+    \min_{\lambda \in \mathbb{R}^p, P \in \mathbb{S}^n} ~~ c^\top \lambda - trace (\Sigma P)\\
+    \begin{array}{c|cc}
+		\mathcal{A}^\top & I & C^\top\\ \hline
+		I & 0 & 0
+	\end{array}
+	\right)^\top
+	\left(
+	\begin{array}{c|c}
+		0 & P\\\hline
+		P & 0
+	\end{array}
+	\right)
+	\left(
+	\begin{array}{c|cc}
+		\mathcal{A}^\top & I & C^\top\\ \hline
+		I & 0 & 0
+	\end{array}
+	\right) - 
+	(\star)^\top \begin{pmatrix}
+		\mathcal{Q}^{-1} & 0 & &\\
+		0 & \mathcal{R}^{-1} & &\\
+		& & M_{11}(\lambda) & M_{12}(\lambda)\\
+		& & M_{21}(\lambda) & M_{22}(\lambda)
+	\end{pmatrix}
+	\left(
+	\begin{array}{c|cc}
+		0 & -I & 0\\
+		\mathcal{B}^\top & 0 & I\\
+		0 & 0 & -I\\
+		\mathcal{B}^\top & 0 & 0
+	\end{array}\right)\\
+	\lambda_i > 0 ~~~ \forall i = 1,\ldots,p\\
+	P \succ 0
+$$
+for $P$ and $\lambda$. This is a KYP-SDP for Robust state feedback controller synthesis.
+
+To benchmark our solver, we extract matrices $(\mathcal{A},\mathcal{B})$ from CompLib and solve the KYP-SDP above for various dynamical systems.
+
+The following table compares computation times (in seconds) of the structure exploiting solver and the three off-the-shelve
+solvers Mosek, SeDuMi and LMILab. Inf means that the solver did not terminate after 10^4 seconds.
 
 
     Problem      customSolver     Mosek       SeDuMi      LMILab 
@@ -174,7 +304,8 @@ solvers Mosek, SeDuMi and LMILab.
 
 
 
-The next table provides the optimal values achieved by each solver (larger is better)
+The next table provides the optimal values achieved by each solver (larger is better). Note that
+the Mosek/SeDuMI solution for EB5 and EB6 is highly inaccurate.
 
      Problem      customSolver      Mosek         SeDuMi       LMILab  
     __________    ____________    __________    __________    _________
